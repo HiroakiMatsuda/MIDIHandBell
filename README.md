@@ -49,7 +49,7 @@ MIDIHandBell
 ホビーサーボを動作させハンドベルを鳴らす制御全般を行うPython Moduleです.  
 このファイル内でホビーサーボのIDとハンドベルの周波数のマッピングを行っています．  
 
-* pyrs.py
+* pyrs.py  
 Futaba製のホビーサーボの制御を行うPython Moduleです．  
 このモジュールの説明は[こちら][pyrs]をご覧ください．  
 
