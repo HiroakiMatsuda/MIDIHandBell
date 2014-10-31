@@ -99,7 +99,7 @@ MIDIメッセージを受け取り，受け取ったデータをコンソール�
 [MIDIParser][parser]はMIDIファイルを解析し，MIDI::MIDIMessage型のデータを曲のタイミングに合わせて出力するRTCです．  
 [こちら][parser]よりDLしてください．
 
-[console]:http://pyserial.sourceforge.net/
+[parser]:https://github.com/HiroakiMatsuda/MIDIParser
 
 
 ###2. 解析するMIDIファイルを設定する###
