@@ -66,7 +66,7 @@ MIDIConsoleOut RTC本体です．
 
 RTCの構成
 ------  
-<img src="https://github.com/downloads/HiroakiMatsuda/RsServoManager/readme_01.png" width="400px" />    
+<img src="https://farm8.staticflickr.com/7575/15480999410_06933185a8.jpg" width="400px" />    
 データポートは1つあり、以下のようになっています  
   
 * midi\_in port :InPort  
