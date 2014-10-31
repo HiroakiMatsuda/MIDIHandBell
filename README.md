@@ -15,15 +15,32 @@ Python:
 OS:  
 Windows 8/8.1 64bit / 32bit  
 
+依存モジュール:  
+[pySerial][serial]  
+
+[serial]:http://pyserial.sourceforge.net/
+
+ハンドベル駆動用ホビーサーボ:  
+RS301   
+
+Serial:  
+ [RSC-U485](:http://www.futaba.co.jp/robot/rsc/index.html)  
+RPU-11
+
+更新履歴:  
+------
+
 ファイル構成
 ------
-MIDIParser  
+MIDIHandBell  
 │― idl   
 │― MIDI  
 │― MIDI_POA  
 │― MIDIDataType_idl.py  
-│― MIDIConsoleOut.conf  
-│― MIDIConsoleOut.py  
+│― bell.py  
+│― pyrs.py  
+│― MIDIHandBell.conf  
+│― MIDIHandBell.py  
 
 * MIDI, MIDI_POA, MIDIDataType.py  
 独自データ型 MIDIDataTypeに関するファイルです．  
@@ -31,19 +48,19 @@ MIDIParser
 * bell.py  
 ホビーサーボを動作させハンドベルを鳴らす制御全般を行うPython Moduleです.  
 このファイル内でホビーサーボのIDとハンドベルの周波数のマッピングを行っています．  
- 
-* MIDIHandBell.conf  
-ホビーサーボのPort番号やBaudrateの設定を行います．  
-またハンドベルの振り上げ位置と，振り下ろし位置を設定できます.  
-
-* MIDIHandBell.py  
-MIDIConsoleOut RTC本体です．  
 
 * pyrs.py
 Futaba製のホビーサーボの制御を行うPython Moduleです．  
 このモジュールの説明は[こちら][pyrs]をご覧ください．  
 
 [pyrs]:https://github.com/HiroakiMatsuda/pyrs
+
+* MIDIHandBell.conf  
+ホビーサーボのPort番号やBaudrateの設定を行います．  
+またハンドベルの振り上げ位置と，振り下ろし位置を設定できます.  
+
+* MIDIHandBell.py  
+MIDIConsoleOut RTC本体です．  
 
 ＊ 本RTCにおいてユーザーが操作すると想定しているファイルのみ説明しています．  
 
@@ -57,26 +74,21 @@ RTCの構成
 MIDIメッセージを受け取り，受け取ったデータをコンソール上に表示します．  
 
 * コンフィグレーション  
-  ```mode```  
- MIDIメッセージの表示方法を指定します．  
- ```conf.mode0.<config>: <value>```  
- 表示方法は以下の様なモードから選択することができます．  
- ```port```:  
- 受け取ったMIDI::MIDIMessage型のデータ構造をそのまま表示します．  
- このモードではデータは見づらいですが，全てのデータを見ることができます．  
- ```baudrate```:   
- 受け取ったMIDI::MIDIMessage型のイベントを調べ，Note OnとNote Offの場合のみその情報を表示します．  
- このモードではMIDIデータの大半を占めるNote OnとNote Offを見ることができます．  
- ```down\_position```:  
- 受け取ったMIDI::MIDIMessage型のイベント名を表示します．  
- このモードではイベント名だしか表示されませんが，その分データ量は減るので可読性は向上します．   
-
- ```up\_position```:  
- 受け取ったMIDI::MIDIMessage型のイベント名を表示します．  
- このモードではイベント名だしか表示されませんが，その分データ量は減るので可読性は向上します．   
-
+ ・`port`:  
+ ホビーサーボの通信ポートの設定を行います．  
+ ・`baudrate`:   
+ ホビーサーボのボーレートを設定します．  
+ ・`down\_position`:  
+ ハンドベルの振り下ろし位置を設定します．   
+ ・`up\_position`:  
+ ハンドベルの振り上げ位置を設定します．   
+ ・`channel`:  
+ MIDIメッセージのチャンネルを設定します．  
+ -1を設定した場合は，全チャンネルのメッセージに対して処理を行います．  
+ ・`delay_time`:  
+ 各ロボット間でMIDIメッセージの遅延をキャンセルための待ち時間を設定します．  
+ 設置は1/1000秒となります．  
  
-
  コンフィグレーションはonStartUpで読み込みます．  
  モードを変更する場合は，一度MIDIConsoleOutを終了し，コンフィグレーション変更後に再度実行して下さい．
 
@@ -102,30 +114,12 @@ MIDIParser.confをテキストエディタなどで開きます．
 ＊MIDIファイルはmidifileフォルダ内に配置することを前提としています．  
 
 ```conf.mode<mode number>.midi_file: ./midifile/<file name>.mid ```     
- 
-###3. MIDIConsoleOutの表示モードを設定する###
-MIDIConsoleOutでは受け取ったMIDIメッセージの表示方法を変更することができます．  
 
-MIDIConsoleOut.confをテクストエディタなどで開きます．
-以下のようにmode0がアクティブコンフィグレーションに設定されていると思います．  
-
-```configuration.active_config: mode0```   
-
-このmodeをmode0, mode1, mode2から選択することで表示方法を変えることができます．  
-今回は，mode1を使用します．  
-アクティブコンフィグレーションを以下のようにmode1に変更してください．  
-
-```configuration.active_config: mode1```  
-  
-###4. MIDIメセージを受け取る###
-MIDIParser RTCとMIDIConsoleOut RTCを実行してください．  
-各RTCが起動したらMIDIParser RTCのmidi\_outポートとMIDIConsoleOut RTCのmidi\_inポートを接続します．  
+###3. MIDIメセージを受け取る###
+MIDIParser RTCとMIDIHandBell RTCを実行してください．  
+各RTCが起動したらMIDIParser RTCのmidi\_outポートとMIDIHandBell RTCのmidi\_inポートを接続します．  
 各ポートを接続したらMIDIParser RTCをActivateします．  
-すると，MIDIConsoleOut RTCのコンソール上に以下のようなメッセージが表示されると思います． 
-
-<img src="https://github.com/downloads/HiroakiMatsuda/RsMotion/readme_03.png" width="400px" />   
-
-MIDIConsoleOut RTCのmode1ではNote OffとNote Onのメッセージ内容が表示されます．  
+するとNote Onのイベントに合わせてハンドベルが演奏されます．  
       
 以上が本RTCの使い方となります  
 
