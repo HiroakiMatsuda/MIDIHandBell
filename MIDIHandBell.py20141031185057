@@ -1,0 +1,288 @@
+#py -2.6
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# -*- Python -*-
+# This module has been tested on python ver.2.6.6.
+# ver0.141030
+# (C) 2014 Matsuda Hiroaki
+
+"""
+ @file MIDIHandBell.py
+ @brief ModuleDescription
+ @date $Date$
+
+
+"""
+import sys
+import time
+sys.path.append(".")
+
+# Import RTM module
+import RTC
+import OpenRTM_aist
+
+import MIDI
+import bell
+
+# Import Service implementation class
+# <rtc-template block="service_impl">
+
+# </rtc-template>
+
+# Import Service stub modules
+# <rtc-template block="consumer_import">
+# </rtc-template>
+
+
+# This module's spesification
+# <rtc-template block="module_spec">
+midihandbell_spec = ["implementation_id", "MIDIHandBell", 
+		 "type_name",         "MIDIHandBell", 
+		 "description",       "ModuleDescription", 
+		 "version",           "1.0.0", 
+		 "vendor",            "Hiroaki Matsuda", 
+		 "category",          "MID", 
+		 "activity_type",     "STATIC", 
+		 "max_instance",      "1", 
+		 "language",          "Python", 
+		 "lang_type",         "SCRIPT",
+		 "conf.default.port", "COM1",
+		 "conf.default.baudrate", "115200",
+		 "conf.default.down_position", "1500",
+		 "conf.default.up_position", "1100",
+		 "conf.__widget__.port", "text",
+		 "conf.__widget__.baudrate", "text",
+		 "conf.__widget__.down_position", "text",
+		 "conf.__widget__.up_position", "text",
+		 ""]
+# </rtc-template>
+
+##
+# @class MIDIHandBell
+# @brief ModuleDescription
+# 
+#
+
+def play_bell(bears, message, down_times):
+    
+    note_numbers = bears.get_note_numbers()
+
+    print message.event
+    
+    if message.event == 'Note On':
+        if message.ch.note_number in note_numbers:
+            if message.ch.velocity != 0:
+                bears.note_on(message.ch.note_number, 3, 0x00)
+                down_times[message.ch.note_number] = time.time()
+                print('Bears: Note On: Ch-%d Note-%d Vel-%d' %(message.ch.channel,
+                                                               message.ch.note_number,
+                                                               message.ch.velocity))
+
+class DataListener(OpenRTM_aist.ConnectorDataListenerT):
+        
+        def __init__(self, name, bears, down_times):
+                self._name = name
+                self.bears = bears
+                self.down_times = down_times
+                
+        def __del__(self):
+                print("dtor of %s" %(self._name))
+
+        def __call__(self, info, cdrdata):
+        
+                data = OpenRTM_aist.ConnectorDataListenerT.__call__(self,
+                                                                    info,
+                                                                    cdrdata,
+                                                                    MIDI.MIDIMessage(RTC.Time(0, 0),
+                                                                                     '',
+                                                                                     MIDI.ChannelMessage(0, 0, 0, 0, 0, 0, 0, 0, 0),
+                                                                                     MIDI.SystemMessage("", 0,"","","","","",
+                                                                                                        "","","","", 0, 0, 0,
+                                                                                                         0, 0, 0, 0, 0, 0, 0)))
+
+                
+                play_bell(self.bears, data, self.down_times)
+                
+
+class MIDIHandBell(OpenRTM_aist.DataFlowComponentBase):
+	
+	##
+	# @brief constructor
+	# @param manager Maneger Object
+	# 
+	def __init__(self, manager):
+		OpenRTM_aist.DataFlowComponentBase.__init__(self, manager)
+
+		self._d_message = MIDI.MIDIMessage(RTC.Time(0,0),
+                                                   '',
+                                                   MIDI.ChannelMessage(0, 0, 0, 0, 0, 0, 0, 0, 0),
+                                                   MIDI.SystemMessage("", 0,"","","","","",
+                                                                      "","","","", 0, 0, 0,
+                                                                       0, 0, 0, 0, 0, 0, 0))
+		"""
+		"""
+		self._midi_inIn = OpenRTM_aist.InPort("midi_in", self._d_message)
+
+
+		
+
+
+		# initialize of configuration-data.
+		# <rtc-template block="init_conf_param">
+		"""
+		
+		 - Name:  port
+		 - DefaultValue: COM1
+		"""
+		self._port = ['COM1']
+		"""
+		
+		 - Name:  baudrate
+		 - DefaultValue: 115200
+		"""
+		self._baudrate = [115200]
+		"""
+		
+		 - Name:  down_position
+		 - DefaultValue: 1500
+		"""
+		self._down_position = [1500]
+		"""
+		
+		 - Name:  up_position
+		 - DefaultValue: 1100
+		"""
+		self._up_position = [1100]
+		
+		# </rtc-template>
+
+
+		 
+	##
+	#
+	# The initialize action (on CREATED->ALIVE transition)
+	# formaer rtc_init_entry() 
+	# 
+	# @return RTC::ReturnCode_t
+	# 
+	#
+	def onInitialize(self):
+		# Bind variables and configuration variable
+		self.bindParameter("port", self._port, "COM1")
+		self.bindParameter("baudrate", self._baudrate, "115200")
+		self.bindParameter("down_position", self._down_position, "1500")
+		self.bindParameter("up_position", self._up_position, "1100")
+		
+		# Set InPort buffers
+		self.addInPort("midi_in",self._midi_inIn)
+		
+		# Set OutPort buffers
+		
+		# Set service provider to Ports
+		
+		# Set service consumers to Ports
+		
+		# Set CORBA Service Ports
+
+
+		#self.bears = None
+		self.down_times = {57: -1, 58: -1, 59: -1, 60: -1, 61: -1,
+                                   62: -1, 63: -1, 64: -1, 65: -1, 66: -1,
+                                   67: -1, 68: -1, 69: -1, 70: -1, 71: -1,
+                                   72: -1, 73: -1, 74: -1, 75: -1, 76: -1}
+		
+		return RTC.RTC_OK
+	def onStartup(self, ec_id):
+                print("port: %s baudrate: %d down_pos: %d up_pos: %d" % (self._port[0],
+                                                                        self._baudrate[0],
+                                                                        self._down_position[0],
+                                                                        self._up_position[0]))
+                
+                self.bears = bell.Bell(self._port[0],
+                                       self._baudrate[0],
+                                       self._down_position[0],
+                                       self._up_position[0])
+                
+                self._midi_inIn.addConnectorDataListener(OpenRTM_aist.ConnectorDataListenerType.ON_RECEIVED,
+                                                         DataListener("ON_RECEIVED", self.bears, self.down_times))
+	
+		return RTC.RTC_OK
+	
+		##
+		#
+		# The shutdown action when ExecutionContext stop
+		# former rtc_stopping_entry()
+		#
+		# @param ec_id target ExecutionContext Id
+		#
+		# @return RTC::ReturnCode_t
+		#
+		#
+		
+	def onShutdown(self, ec_id):
+                self.bears.rs.close_port()
+                print("Close Port")
+                
+		return RTC.RTC_OK
+	
+
+	def onActivated(self, ec_id):
+                
+                print("Activate Bears")
+                self.bears.all_servo_on(1)  
+                self.bears.set_positions(1000, 200)
+                time.sleep(2)  
+
+                self.start = time.time()
+                                                         
+		return RTC.RTC_OK
+	
+	def onDeactivated(self, ec_id):
+                print("Inactivate Bears")
+                
+                self.bears.set_positions(1400, 200)
+                time.sleep(2)
+                self.bears.all_servo_on(0)
+                
+		return RTC.RTC_OK
+	
+	def onExecute(self, ec_id):
+                
+                now = time.time()
+                
+                for note_number, on_time in self.down_times.iteritems():
+                                                         
+                        if on_time != -1 and (now - on_time) > 0.19:
+                                self.bears.note_off(note_number, 6, 0x00)
+                                self.down_times[note_number] = -1
+
+                
+	
+		return RTC.RTC_OK
+	
+	def onAborting(self, ec_id):
+	
+		return RTC.RTC_OK
+
+	
+def MIDIHandBellInit(manager):
+    profile = OpenRTM_aist.Properties(defaults_str=midihandbell_spec)
+    manager.registerFactory(profile,
+                            MIDIHandBell,
+                            OpenRTM_aist.Delete)
+
+def MyModuleInit(manager):
+    MIDIHandBellInit(manager)
+
+    # Create a component
+    comp = manager.createComponent("MIDIHandBell")
+
+def main():
+	mgr = OpenRTM_aist.Manager.init(sys.argv)
+	mgr.setModuleInitProc(MyModuleInit)
+	mgr.activateManager()
+	mgr.runManager()
+
+if __name__ == "__main__":
+	main()
+

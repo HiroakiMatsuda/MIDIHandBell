@@ -1,0 +1,54 @@
+# MIDIHandBell CMake config file
+#
+# This file sets the following variables:
+# MIDIHandBell_FOUND - Always TRUE.
+# MIDIHandBell_INCLUDE_DIRS - Directories containing the MIDIHandBell include files.
+# MIDIHandBell_IDL_DIRS - Directories containing the MIDIHandBell IDL files.
+# MIDIHandBell_LIBRARIES - Libraries needed to use MIDIHandBell.
+# MIDIHandBell_DEFINITIONS - Compiler flags for MIDIHandBell.
+# MIDIHandBell_VERSION - The version of MIDIHandBell found.
+# MIDIHandBell_VERSION_MAJOR - The major version of MIDIHandBell found.
+# MIDIHandBell_VERSION_MINOR - The minor version of MIDIHandBell found.
+# MIDIHandBell_VERSION_REVISION - The revision version of MIDIHandBell found.
+# MIDIHandBell_VERSION_CANDIDATE - The candidate version of MIDIHandBell found.
+
+message(STATUS "Found MIDIHandBell-@PROJECT_VERSION@")
+set(MIDIHandBell_FOUND TRUE)
+
+find_package(<dependency> REQUIRED)
+
+#set(MIDIHandBell_INCLUDE_DIRS
+#    "@CMAKE_INSTALL_PREFIX@/include/@PROJECT_NAME_LOWER@-@PROJECT_VERSION_MAJOR@"
+#    ${<dependency>_INCLUDE_DIRS}
+#    )
+#
+#set(MIDIHandBell_IDL_DIRS
+#    "@CMAKE_INSTALL_PREFIX@/include/@PROJECT_NAME_LOWER@-@PROJECT_VERSION_MAJOR@/idl")
+set(MIDIHandBell_INCLUDE_DIRS
+    "@CMAKE_INSTALL_PREFIX@/include/@CPACK_PACKAGE_FILE_NAME@"
+    ${<dependency>_INCLUDE_DIRS}
+    )
+set(MIDIHandBell_IDL_DIRS
+    "@CMAKE_INSTALL_PREFIX@/include/@CPACK_PACKAGE_FILE_NAME@/idl")
+
+
+if(WIN32)
+    set(MIDIHandBell_LIBRARIES
+        "@CMAKE_INSTALL_PREFIX@/@LIB_INSTALL_DIR@/@CMAKE_SHARED_LIBRARY_PREFIX@@PROJECT_NAME_LOWER@@CMAKE_STATIC_LIBRARY_SUFFIX@"
+        ${<dependency>_LIBRARIES}
+        )
+else(WIN32)
+    set(MIDIHandBell_LIBRARIES
+        "@CMAKE_INSTALL_PREFIX@/@LIB_INSTALL_DIR@/@CMAKE_SHARED_LIBRARY_PREFIX@@PROJECT_NAME_LOWER@@CMAKE_SHARED_LIBRARY_SUFFIX@"
+        ${<dependency>_LIBRARIES}
+        )
+endif(WIN32)
+
+set(MIDIHandBell_DEFINITIONS ${<dependency>_DEFINITIONS})
+
+set(MIDIHandBell_VERSION @PROJECT_VERSION@)
+set(MIDIHandBell_VERSION_MAJOR @PROJECT_VERSION_MAJOR@)
+set(MIDIHandBell_VERSION_MINOR @PROJECT_VERSION_MINOR@)
+set(MIDIHandBell_VERSION_REVISION @PROJECT_VERSION_REVISION@)
+set(MIDIHandBell_VERSION_CANDIDATE @PROJECT_VERSION_CANDIDATE@)
+
